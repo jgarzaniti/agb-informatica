@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>AGB Informática · Cotización</title>
+  <style>
+    :root {
+      --primary: #0066FF;
+      --bg: #F2F7FF;
+      --text: #334155;
+      --white: #FFFFFF;
+      --gray-light: #E2E8F0;
+      --gray: #64748B;
+    }
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body {
+      display:flex; flex-direction:column; min-height:100vh;
+      font-family:'Segoe UI',sans-serif;
+      background:var(--bg); color:var(--text);
+    }
+    a { text-decoration:none; color:inherit; cursor:pointer; }
+
+    /* ===== HEADER ===== */
+    header {
+      display:flex; align-items:center; justify-content:space-between;
+      background:var(--white); border-bottom:1px solid var(--gray-light);
+      padding:.75rem 1.5rem;
+    }
+    .logo-group {
+      display:flex; flex-direction:column;
+    }
+    .logo-group .logo {
+      font-size:1.4rem; font-weight:bold; color:var(--primary);
+    }
+    .logo-group .slogan {
+      font-size:.85rem; color:var(--gray); margin-top:.25rem;
+    }
+    nav.primary {
+      display:flex; align-items:center; gap:1rem;
+    }
+    nav.primary > div { position:relative; }
+    nav.primary button, nav.primary a {
+      background:none; border:none; font-size:.95rem;
+      padding:.4rem .6rem; border-radius:6px; font-weight:500;
+      transition:background .2s;
+    }
+    nav.primary button:hover, nav.primary a:hover {
+      background:var(--gray-light); color:var(--primary);
+    }
+    .submenu {
+      display:none; position:absolute; top:100%; left:0;
+      background:var(--white); border:1px solid var(--gray-light);
+      border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.05);
+      z-index:10;
+    }
+    .submenu a {
+      display:block; padding:.5rem 1rem; font-size:.9rem;
+      white-space:nowrap;
+    }
+    .submenu a:hover {
+      background:var(--gray-light); color:var(--primary);
+    }
+    .login-btn {
+      background:var(--primary); color:var(--black);
+      border:none; padding:.5rem 1rem; border-radius:6px;
+      cursor:pointer; font-weight:500; transition:opacity .2s;
+    }
+    .login-btn:hover { opacity: 0.5; }
+    .internal-menu {
+      display:none; gap:1rem; margin-left:1.5rem;
+    }
+    .internal-menu a {
+      font-size:.95rem; padding:.4rem .6rem; border-radius:6px;
+      transition:background .2s;
+    }
+    .internal-menu a:hover {
+      background:var(--gray-light); color:var(--primary);
+    }
+
+    /* ===== LAYOUT ===== */
+    .container {
+      flex:1; display:flex; overflow:hidden;
+    }
+
+    /* ===== WIZARD VERTICAL ===== */
+    .wizard {
+      width:240px; background:var(--white);
+      border-right:1px solid var(--gray-light);
+      padding:1.5rem; overflow-y:auto;
+    }
+    .wizard .step {
+      display:flex; align-items:center; gap:.75rem;
+      margin-bottom:1rem; font-size:.95rem; color:var(--gray);
+    }
+    .wizard .step .circle {
+      width:1.25rem; height:1.25rem; border:2px solid currentColor;
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+      font-size:.85rem;
+    }
+    .wizard .step.completed { color:var(--gray); }
+    .wizard .step.completed .circle {
+      background:var(--gray-light); border-color:var(--gray);
+      color:var(--gray);
+    }
+    .wizard .step.current {
+      color:var(--primary); font-weight:bold;
+    }
+    .wizard .step.current .circle {
+      background:var(--primary); border-color:var(--primary);
+      color:var(--white);
+    }
+
+    /* ===== CONTENT ===== */
+    .content {
+      flex:1; padding:2rem; overflow-y:auto; position:relative;
+    }
+    .content h1 {
+      font-size:1.8rem; color:var(--primary); margin-bottom:.5rem;
+    }
+    .content p {
+      color:#475569; margin-bottom:1.5rem;
+    }
+    input, select {
+      width:100%; padding:.75rem 1rem; font-size:1rem;
+      border:1px solid var(--gray-light); border-radius:8px;
+      margin-bottom:1.5rem;
+    }
+
+    /* Paso 1: Dispositivo */
+    .devices-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+      gap:1rem; margin-bottom:1.5rem;
+    }
+    .device-item {
+      background:var(--white); padding:.75rem; border-radius:12px;
+      display:flex; flex-direction:column; align-items:center;
+      justify-content:center; cursor:pointer;
+      transition:transform .2s,box-shadow .2s;
+    }
+    .device-item:hover {
+      transform:translateY(-3px);
+      box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    }
+    .device-item img {
+      width:48px; height:48px; margin-bottom:.5rem;
+    }
+
+    /* Paso 2: Fabricante */
+    .brands-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+      gap:.75rem; margin-bottom:1.5rem;
+    }
+    .brand-item {
+      background:var(--white); padding:.5rem; border-radius:12px;
+      display:flex; flex-direction:column; align-items:center;
+      cursor:pointer; transition:transform .2s,box-shadow .2s;
+    }
+    .brand-item:hover {
+      transform:translateY(-3px);
+      box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    }
+    .brand-item img {
+      max-width:60px; height:auto; margin-bottom:.5rem;
+    }
+
+    /* Paso 3: Modelo */
+    /* usa input+select generales */
+
+    /* ===== Paso 4: Falla ===== */
+    .faults-grid {
+      width:100%;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:1rem; margin-bottom:1.5rem;
+    }
+    .fault {
+      background:var(--white);
+      border:1px solid var(--gray-light);
+      border-radius:8px; padding:.75rem;
+      display:grid;
+      grid-template-columns: auto max-content;
+      align-items:center;
+      gap:.5rem;
+      transition:background .2s;
+    }
+    .fault:hover {
+      background:#EEF6FF;
+    }
+    .fault-label {
+      display:flex; align-items:center; gap:.5rem;
+      font-size:.95rem;
+    }
+    .fault-label svg {
+      width:18px; height:18px; fill:var(--gray);
+    }
+
+    /* Paso 5: Datos */
+    /* usa inputs generales */
+
+    /* Paso 6: Servicio */
+    .services-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+      gap:1rem; margin-bottom:1.5rem;
+    }
+    .service-item {
+      background:var(--white); padding:.75rem; border-radius:8px;
+      display:flex; align-items:center; gap:.75rem; cursor:pointer;
+      transition:transform .2s,box-shadow .2s;
+    }
+    .service-item:hover {
+      transform:translateY(-2px);
+      box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    }
+    .service-item svg {
+      width:24px; height:24px; fill:var(--primary);
+    }
+
+    /* Navegación pasos */
+    .nav-buttons {
+      display:flex; justify-content:space-between; margin-top:2rem;
+    }
+    .btn {
+      padding:.6rem 1.2rem; border-radius:6px; font-size:1rem;
+      cursor:pointer; border:none; transition:opacity .2s;
+    }
+    .btn.back {
+      background:var(--white); color:var(--primary);
+      border:1px solid var(--primary);
+    }
+    .btn.next {
+      background:var(--primary); color:var(--white);
+    }
+    .btn:disabled {
+      opacity:.5; cursor:default;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-group">
+      <div class="logo">AGB Informática</div>
+      <div class="slogan">Mantenimiento y Reparación de equipos Informáticos</div>
+    </div>
+    <nav class="primary">
+      <div>
+        <button id="servicesBtn">Servicios ▾</button>
+        <div class="submenu" id="servicesMenu">
+          <a href="#">Autoentrega</a>
+          <a href="#">Recogida a Domicilio</a>
+          <a href="#">Exprés 24 h</a>
+          <a href="#">Atención a Domicilio</a>
+          <a href="#">Soporte Remoto</a>
+        </div>
+      </div>
+      <button onclick="alert('Contacto')">Contacto</button>
+      <div class="internal-menu" id="internalMenu">
+        <a href="#">Dashboard</a>
+        <a href="#">Clientes</a>
+        <a href="#">Técnicos</a>
+        <a href="#">Taller</a>
+      </div>
+      <button class="login-btn" id="loginBtn">Iniciar sesión</button>
+    </nav>
+  </header>
+
+  <div class="container">
+    <aside class="wizard">
+      <div class="step current"><div class="circle">1</div><div>Dispositivo</div></div>
+      <div class="step"><div class="circle">2</div><div>Fabricante</div></div>
+      <div class="step"><div class="circle">3</div><div>Modelo</div></div>
+      <div class="step"><div class="circle">4</div><div>Fallas</div></div>
+      <div class="step"><div class="circle">5</div><div>Datos</div></div>
+      <div class="step"><div class="circle">6</div><div>Servicio</div></div>
+    </aside>
+
+    <section class="content">
+
+      <!-- Paso 1: Dispositivo -->
+      <div class="step-content" data-step="1">
+        <h1>¿Qué dispositivo vamos a reparar?</h1>
+        <p>Selecciona o escribe el nombre.</p>
+        <input type="text" placeholder="Buscar dispositivo…" oninput="filterDevices(this.value)"> 
+        <div class="devices-grid" id="devicesGrid"></div>
+      </div>
+
+      <!-- Paso 2: Fabricante -->
+      <div class="step-content" data-step="2" style="display:none;">
+        <h1>Indica el fabricante</h1>
+        <p>Escríbelo o elige su logo.</p>
+        <div id="tokenBox" style="display:none;">
+          <input type="text" placeholder="Código de seguimiento"
+                 onkeypress="if(event.key==='Enter')alert('Token:'+this.value)">
+        </div>
+        <p style="color:var(--primary);cursor:pointer;"
+           onclick="toggleTokenBox()">🔍 Seguimiento sin cuenta</p>
+        <input type="text" placeholder="Buscar marca…" oninput="filterBrands(this.value)">
+        <div class="brands-grid" id="brandsGrid"></div>
+      </div>
+
+      <!-- Paso 3: Modelo -->
+      <div class="step-content" data-step="3" style="display:none;">
+        <h1>¿Cuál es el modelo?</h1>
+        <p>Selecciona o escribe el modelo.</p>
+        <input type="text" placeholder="Buscar modelo…" onfocus="toggleModelList(true)">
+        <select size="5" style="display:none;"
+          onchange="this.previousElementSibling.value=this.value">
+          <option>14-dq0011dx</option><option>20-f295la</option><option>Elitebook</option>
+          <option>310-1020la</option><option>Hp 14</option>
+        </select>
+      </div>
+
+      <!-- Paso 4: Falla -->
+      <div class="step-content" data-step="4" style="display:none;">
+        <h1>¿Qué falla presenta tu equipo?</h1>
+        <p>Marca todas las que correspondan.</p>
+        <div class="faults-grid" id="faultsGrid"></div>
+      </div>
+
+      <!-- Paso 5: Datos -->
+      <div class="step-content" data-step="5" style="display:none;">
+        <h1>Déjanos tus datos</h1>
+        <p>Para enviarte la cotización y coordinar.</p>
+        <input type="text" placeholder="Nombre">
+        <input type="text" placeholder="Apellido">
+        <input type="email" placeholder="Email">
+        <input type="tel" placeholder="Teléfono">
+        <input type="text" placeholder="Dirección">
+        <input type="text" placeholder="Código descuento (opcional)">
+      </div>
+
+      <!-- Paso 6: Servicio -->
+      <div class="step-content" data-step="6" style="display:none;">
+        <h1>Selecciona modalidad</h1>
+        <p>Elige cómo gestionar tu equipo.</p>
+        <div class="services-grid" id="servicesGrid"></div>
+      </div>
+
+      <!-- Botones atrás/siguiente -->
+      <div class="nav-buttons">
+        <button class="btn back" onclick="prevStep()" disabled>Atrás</button>
+        <button class="btn next" onclick="nextStep()">Siguiente</button>
+      </div>
+
+    </section>
+  </div>
+
+  <script>
+    // Submenú Servicios
+    const sb = document.getElementById('servicesBtn'),
+          sm = document.getElementById('servicesMenu');
+    sb.onclick = ()=> sm.style.display = sm.style.display==='block'?'none':'block';
+    document.addEventListener('click', e=>{
+      if(!sb.contains(e.target)) sm.style.display='none';
+    });
+
+    // Simular login
+    document.getElementById('loginBtn').onclick = ()=>{
+      document.getElementById('internalMenu').style.display='flex';
+      document.getElementById('loginBtn').style.display='none';
+    };
+
+    // Wizard lógica
+    let step=1, max=6;
+    const stepsEls = document.querySelectorAll('.wizard .step'),
+          contents = document.querySelectorAll('.step-content'),
+          btnB = document.querySelector('.btn.back'),
+          btnN = document.querySelector('.btn.next');
+    function show(n){
+      stepsEls.forEach((s,i)=>{
+        s.classList.toggle('completed', i+1<n);
+        s.classList.toggle('current',  i+1===n);
+      });
+      contents.forEach(c=>{
+        c.style.display = parseInt(c.dataset.step)===n?'block':'none';
+      });
+      btnB.disabled = n===1;
+      btnN.disabled = n===max;
+    }
+    function prevStep(){ if(step>1) show(--step); }
+    function nextStep(){ if(step<max) show(++step); }
+    btnB.onclick = prevStep; btnN.onclick = nextStep;
+    show(step);
+
+    // Paso 1: dispositivos
+    const devices = ["Computadora","Smartphone","Tablet","Impresora"],
+          dgrid   = document.getElementById('devicesGrid');
+    function renderDevices(list){
+      dgrid.innerHTML = '';
+      list.forEach(name=>{
+        const el = document.createElement('div');
+        el.className = 'device-item';
+        el.innerHTML = `<img src="icons/${name.toLowerCase()}.svg"><div>${name}</div>`;
+        el.onclick = ()=>console.log('Dispositivo:',name);
+        dgrid.appendChild(el);
+      });
+    }
+    function filterDevices(q){
+      q = q.toLowerCase();
+      renderDevices(devices.filter(d=>d.toLowerCase().includes(q)));
+    }
+    renderDevices(devices);
+
+    // Paso 2: marcas
+    const brands = ["HP","Dell","Lenovo","Acer","Asus","Samsung","Toshiba","Sony","Otra"],
+          bgrid  = document.getElementById('brandsGrid');
+    function renderBrands(list){
+      bgrid.innerHTML = '';
+      list.forEach(name=>{
+        const key = name.replace(/\W+/g,'_'),
+              el  = document.createElement('div');
+        el.className = 'brand-item';
+        el.innerHTML = `<img src="oval_buttons/${key}.png"><div>${name}</div>`;
+        el.onclick = ()=>console.log('Marca:',name);
+        bgrid.appendChild(el);
+      });
+    }
+    function filterBrands(q){
+      q = q.toLowerCase();
+      renderBrands(brands.filter(b=>b.toLowerCase().includes(q)));
+    }
+    renderBrands(brands);
+    function toggleTokenBox(){
+      const tb=document.getElementById('tokenBox');
+      tb.style.display = tb.style.display==='block'?'none':'block';
+    }
+
+    // Paso 3: modelo
+    function toggleModelList(show){
+      document.querySelector('select').style.display = show?'block':'none';
+    }
+
+    // Paso 4: fallas
+    const faults = [
+      "No inicia sistema operativo","Sobrecalienta","Bisagras dañadas/rotas",
+      "Teclado con fallas","Pantalla azul","Ruido excesivo","Se apaga sola",
+      "Falla cargador (Notebook)","Funciona muy lento","Pantalla rota",
+      "Batería agotada","No enciende","Sin imagen (No da video)",
+      "Falla puerto de carga","Limpieza y mantenimiento","Otra"
+    ], fgrid = document.getElementById('faultsGrid');
+    function renderFaults(){
+      fgrid.innerHTML = '';
+      faults.forEach(text=>{
+        const lbl = document.createElement('label');
+        lbl.className = 'fault';
+        lbl.innerHTML = `
+          <div class="fault-label">
+            <svg viewBox="0 0 24 24"><path d="M3 4h18v12H3z"/></svg>
+            ${text}
+          </div>
+          <input type="checkbox">`;
+        fgrid.appendChild(lbl);
+      });
+    }
+    renderFaults();
+
+    // Paso 6: servicios
+    const services = [
+      "Autoentrega","Recogida a Domicilio","Exprés 24 h",
+      "Atención a Domicilio","Soporte Remoto"
+    ], sgrid = document.getElementById('servicesGrid');
+    function renderServices(){
+      sgrid.innerHTML = '';
+      services.forEach(name=>{
+        const el = document.createElement('div');
+        el.className = 'service-item';
+        el.innerHTML = `
+          <svg viewBox="0 0 24 24"><path d="M3 4h18v16H3z"/></svg>
+          <div>${name}</div>`;
+        sgrid.appendChild(el);
+      });
+    }
+    renderServices();
+  </script>
+</body>
+</html>
