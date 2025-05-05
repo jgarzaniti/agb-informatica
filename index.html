@@ -414,7 +414,7 @@
         const key = name.replace(/\W+/g,'_'),
               el  = document.createElement('div');
         el.className = 'brand-item';
-        el.innerHTML = `<img src="oval_buttons/${key}.png"><div>${name}</div>`;
+        el.innerHTML = `<img src="images/${key}.png"><div>${name}</div>`;
         el.onclick = ()=>console.log('Marca:',name);
         bgrid.appendChild(el);
       });
